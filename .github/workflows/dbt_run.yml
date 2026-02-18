@@ -31,6 +31,20 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Microsoft ODBC Driver (Ubuntu)
+        run: |
+          # Microsoft Repo hinzufügen
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+          curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          
+          # Treiber installieren
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
+          
+          # WICHTIG: Sicherstellen, dass die Library-Pfade aktualisiert werden
+          sudo ldconfig
+
+
       - name: Install dependencies
         run: |
           sudo apt-get update

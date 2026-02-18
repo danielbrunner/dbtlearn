@@ -1,0 +1,43 @@
+name: dbt_azure_run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Erlaubt manuelles Starten
+
+jobs:
+  run_dbt:
+    runs-on: ubuntu-latest
+
+
+    defaults:
+      run:
+        working-directory: testdbt
+
+        
+    env:
+      DBT_AZURE_HOST: ${{ secrets.DBT_AZURE_HOST }}
+      DBT_AZURE_USER: ${{ secrets.DBT_AZURE_USER }}
+      DBT_AZURE_PWD: ${{ secrets.DBT_AZURE_PWD }}
+      DBT_AZURE_DB: ${{ secrets.DBT_AZURE_DB }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unixodbc-dev
+          pip install dbt-core==1.8.3 dbt-fabric==1.8.3 dbt-sqlserver==1.8.3
+
+      - name: Run dbt
+        run: |
+          # Wir nutzen hier kein DYLD_LIBRARY_PATH, da Ubuntu unixodbc direkt findet
+          dbt run --profiles-dir .
